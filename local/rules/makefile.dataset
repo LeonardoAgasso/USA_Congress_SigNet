@@ -1,1 +1,14 @@
 .DELETE_ON_ERROR:
+
+
+# Download "download_votes_merged" and "download_votes_merged_senate" from the drive folder: https://drive.google.com/drive/u/2/folders/10DVRPm1tRrdWe0IfVuFh5YX1IeFCypDi
+
+
+download_votes_merged:
+	gdown --folder --id 1DX-RbFvRbdzk--q7Avr1Mu4sneQ8rwBv
+
+download_votes_merged_senate:
+	gdown --folder --id 1M-OJckdv4ISyGpTffwF-Vmr9jwUFpKzK
+
+HSall_members.csv:
+	gdown --file 1FnYO1CPrC6SS_KmCihD853YdkJ7qAtD9
