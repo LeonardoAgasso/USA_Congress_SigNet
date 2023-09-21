@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+ # take a csv as standard input, return a tsv as standard output
+ # usage: csv2tsv < input.csv > output.tsv
+
+import csv
+import sys
+import errno
+
+def ignore_broken_pipe(func):
+    def inner(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except IOError as e:
+            if e.errno == errno.EPIPE:
+                sys.exit(0)
+            else:
+                raise
+
+    return inner
+
+@ignore_broken_pipe
+def csv_to_tsv():
+    # Read CSV from standard input and write TSV to standard output
+    reader = csv.reader(sys.stdin)
+    writer = csv.writer(sys.stdout, delimiter='\t', quoting=csv.QUOTE_MINIMAL)
+    
+    for row in reader:
+        writer.writerow(row)
+
+if __name__ == "__main__":
+    csv_to_tsv()

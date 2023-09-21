@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# given an argument aplly "column -t" and "less -S" to it
+# -S: chop long lines
+# -t: align columns
+#
+# usage: cless <file>
+#
+
+column -t $1 | less -S

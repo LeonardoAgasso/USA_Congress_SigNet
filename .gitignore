@@ -1,1 +1,3 @@
-dataset/*
+dataset/download_votes_merged/*.csv
+dataset/download_votes_merged_senate/*csv
+
