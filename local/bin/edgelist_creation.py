@@ -36,6 +36,31 @@ def plot_votes_per_congress(path='../dataset/download_votes_merged/*'):
 
 
 
+def plot_members_per_congress(path='../dataset/download_votes_merged/*'):
+	res = {}
+	for csv in tqdm(glob.glob(path)):
+		if '.csv' in csv:
+			congress = int(os.path.basename(csv).replace('congress_','').replace('.csv',''))
+			res[congress] = len(set(pd.read_csv(csv)['name']))
+
+	sort_ = sorted(res.items())
+	x, y = zip(*sort_)
+	
+	plt.plot(x, y)
+
+	plt.suptitle('Number of members per congress', fontsize=20)
+	plt.xlabel('congress number', fontsize=18)
+	plt.ylabel('number of members', fontsize=16)
+	# start the y axis from 0
+	plt.ylim(bottom=0, top=max(y)+100)
+
+
+	plt.show()
+	
+	return res
+
+
+
 def create_members_df(members, party_codes):
     temp_congress = members.groupby('icpsr', as_index=False)[['congress']].agg(lambda x: list(x))                                                           # group by icpsr and aggregate the congress numbers into a list
     temp_party = members.groupby('icpsr', as_index=False)[['party_code']].agg(lambda x: list(set(x)))                                                       # group by icpsr and aggregate the party codes into a list
