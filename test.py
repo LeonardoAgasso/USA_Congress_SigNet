@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 Created on Mon Dec 28 13:32:56 2020
 
 @author: alfonso
 """
+
+import sys
+sys.path.insert(0, 'local/bin')
 
 import pandas as pd
 import networkx as nx
@@ -52,13 +56,13 @@ def read_congress(file, art):
 art = pd.DataFrame()
 
 ## GLOB
-for file in glob('arthur/*.csv'):
+for file in glob('../sygno/congress.csv'):
     art = read_congress(file, art)
     art = art.groupby(['source', 'target', 'weight']).sum().reset_index()
 
 
 ## DRAW
-G = nx.from_pandas_edgelist(art, 'source', 'target', ['weight'])
+G = nx.from_pandas_edgelist(art, 'source', 'target', 'weight')
 
 #largest_cc = max(nx.connected_components(G), key=len)
 #S = G.subgraph(largest_cc).copy() 

@@ -14,7 +14,7 @@ from scipy.stats import gaussian_kde
 
 
 
-def plot_votes_per_congress(path='../dataset/download_votes_merged/*'):
+def plot_votes_per_congress(path):
     res = {}
     for csv in tqdm(glob.glob(path)):                                                               # iterate over all csv files in the directory
         if '.csv' in csv:                                                                           # check if it is a csv file
@@ -36,7 +36,7 @@ def plot_votes_per_congress(path='../dataset/download_votes_merged/*'):
 
 
 
-def plot_members_per_congress(path='../dataset/download_votes_merged/*'):
+def plot_members_per_congress(path):
 	res = {}
 	for csv in tqdm(glob.glob(path)):
 		if '.csv' in csv:
