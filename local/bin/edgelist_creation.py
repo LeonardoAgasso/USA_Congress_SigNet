@@ -73,16 +73,16 @@ def create_members_df(members, party_codes):
 
 
 
-def edgelist_from_congress(congress, members_party_dict):
+def party_edgelist_from_congress(congress, members_party_dict):
 	edgelist = pd.DataFrame()
 
 	for voteid in tqdm(set(congress['id'])):                         # iterate over all votes id (ids are unique for each vote)
-    
+
 		temp = congress[congress['id'] == voteid]                 # select the rows where the vote id is equal to the current vote id            
-    
+
 		yy = temp[temp['vote']=='Yea']['icpsr']                         # select the icpsr of the members that voted "Yea"
 		nn = temp[temp['vote']=='Nay']['icpsr']                         
-    
+
 		y = itertools.combinations(yy, 2)                # all possible combinations of 2 members that voted "Yea"
 		n = itertools.combinations(nn, 2)                
 		o = itertools.product(yy, nn)                    # cartesian product of the 2 series
@@ -90,24 +90,22 @@ def edgelist_from_congress(congress, members_party_dict):
 		y = pd.DataFrame(y, columns = ['source', 'target'])     # create a dataframe from the combinations of "Yea" voters
 		y['weight'] = 1                                         # add a column with the weight of the edge
 		y['count'] = 1                                         
-    
+
 		n = pd.DataFrame(n, columns = ['source', 'target'])     
 		n['weight'] = 1                                         
 		n['count'] = 1                                          
-    
+
 		o = pd.DataFrame(o, columns = ['source', 'target'])     
 		o['weight'] = -1                                    # same but the link is negative                    
 		o['count'] = 1                                          
 
 		edgelist = pd.concat([edgelist, y, n, o])                    
 
-
 	edgelist = pd.concat([edgelist, pd.DataFrame({
 		'source': edgelist['target'],                   # new columns based on old columns: 
 		'target': edgelist['source'],                   #   'newcolumn': dataframe['oldcolumn']
 		'weight': edgelist['weight'],
 		'count': edgelist['count']})])
-
 
 	edgelist = edgelist.loc[edgelist['source'] < edgelist['target']]                    # remove duplicates
 	edgelist = edgelist.groupby(['source', 'target', 'weight']).sum().reset_index()     # group by source, target and weight and sum the count
@@ -117,9 +115,56 @@ def edgelist_from_congress(congress, members_party_dict):
 
 	edgelist['votes_togheter'] = edgelist[['source', 'target']].apply(lambda x: map_votes[(x['source'], x['target'])], axis=1)
 	edgelist['perc'] = edgelist['count']/edgelist['votes_togheter']
-     
+
 	return edgelist
      
+
+
+def state_edgelist_from_congress(congress, member_state_dict):
+	edgelist = pd.DataFrame()
+
+	for voteid in tqdm(set(congress['id'])): 
+    
+		temp = congress[congress['id'] == voteid]
+    
+		yy = temp[temp['vote']=='Yea']['icpsr']
+		nn = temp[temp['vote']=='Nay']['icpsr']                         
+    
+		y = itertools.combinations(yy, 2) 
+		n = itertools.combinations(nn, 2)                
+		o = itertools.product(yy, nn) 
+
+		y = pd.DataFrame(y, columns = ['source', 'target'])
+		y['weight'] = 1  
+		y['count'] = 1                                         
+    
+		n = pd.DataFrame(n, columns = ['source', 'target'])     
+		n['weight'] = 1                                         
+		n['count'] = 1                                          
+    
+		o = pd.DataFrame(o, columns = ['source', 'target'])     
+		o['weight'] = -1 
+		o['count'] = 1                                          
+
+		edgelist = pd.concat([edgelist, y, n, o])                    
+
+	edgelist = pd.concat([edgelist, pd.DataFrame({
+		'source': edgelist['target'],
+		'target': edgelist['source'],
+		'weight': edgelist['weight'],
+		'count': edgelist['count']})])
+
+	edgelist = edgelist.loc[edgelist['source'] < edgelist['target']]
+	edgelist = edgelist.groupby(['source', 'target', 'weight']).sum().reset_index()
+	edgelist['state'] = edgelist.apply(lambda row: 'in' if member_state_dict[row['source']] == member_state_dict[row['target']] else 'out', axis=1)
+
+	map_votes = edgelist.groupby(['source', 'target'])['count'].sum().to_dict()                             
+
+	edgelist['votes_togheter'] = edgelist[['source', 'target']].apply(lambda x: map_votes[(x['source'], x['target'])], axis=1)
+	edgelist['perc'] = edgelist['count']/edgelist['votes_togheter']
+     
+	return edgelist
+
 
 
 def plot_kde(df, weight):
@@ -147,7 +192,6 @@ def plot_kde(df, weight):
     
 
 	#label = "agree" if weight == 1 else "disagree"
-
 	x0 = df.loc[(df['party']=='in')&(df['weight'] == weight)]['perc']
 	x1 = df.loc[(df['party']=='out')&(df['weight'] == weight)]['perc']
 
@@ -207,4 +251,32 @@ def plot_kde(df, weight):
 	ax1.set_xlim([-0.07, 1.1])
     
 	plt.show()
+
 	return threshold, area_inters_x
+
+
+
+def intersection_area(df, weight):
+	
+	x0 = df.loc[(df['party']=='in')&(df['weight'] == weight)]['perc']
+	x1 = df.loc[(df['party']=='out')&(df['weight'] == weight)]['perc']
+
+	bw = len(x0)**(-1./(2+4))
+	kde0 = gaussian_kde(x0, bw_method=bw)
+	bw = len(x1)**(-1./(2+4))
+	kde1 = gaussian_kde(x1, bw_method=bw)
+
+	xmin = min(x0.min(), x1.min())
+	xmax = max(x0.max(), x1.max())
+	dx = 0.2 * (xmax - xmin) # add a 20% margin, as the kde is wider than the data
+	xmin -= dx
+	xmax += dx
+
+	x = np.linspace(xmin, xmax, 500)
+	kde0_x = kde0(x)
+	kde1_x = kde1(x)
+	inters_x = np.minimum(kde0_x, kde1_x)
+
+	area_inters_x = np.trapz(inters_x, x)
+	
+	return area_inters_x
