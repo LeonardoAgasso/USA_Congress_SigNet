@@ -73,6 +73,12 @@ def create_members_df(members, party_codes):
 
 
 
+def edgelist_from_congress(congress, members_party_dict):
+	edgelist = party_edgelist_from_congress(congress, members_party_dict)
+	return edgelist
+
+
+
 def party_edgelist_from_congress(congress, members_party_dict):
 	edgelist = pd.DataFrame()
 
@@ -222,6 +228,95 @@ def plot_kde(df, weight):
 	ax1.fill_between(x, kde0_x, 0, color='b', alpha=0.2)
 
 	ax1.plot(x, kde1_x, color='orange', label='inter-party')
+	ax1.fill_between(x, kde1_x, 0, color='orange', alpha=0.2)
+
+	ax1.plot(x, inters_x, color='tomato')
+	ax1.fill_between(x, inters_x, 0, facecolor='none', edgecolor='tomato', label='intersection', alpha=0.5, hatch='xx')
+
+	ax1.axvspan(threshold-0.005, threshold+0.005,color='tomato', alpha=0.7, zorder=10)
+	ax1.text(threshold-.25, .93, 'threshold: '+str(round(threshold, 2)), fontsize=23,transform=ax1.transAxes)
+
+	area_inters_x = np.trapz(inters_x, x)
+
+	handles, labels = plt.gca().get_legend_handles_labels()
+	labels[2] += f': {area_inters_x * 100:.1f} %'
+	ax1.tick_params(axis='both', which='major', labelsize=20)
+
+	plt.xlabel('Edges percentage', fontsize=25)
+	plt.ylabel('Density', fontsize=25)
+	title = "Positive edges" if weight == 1 else "Negative edges"
+	c_title = "g" if weight == 1 else "r"
+	plt.title(title, fontsize=31, pad=10, ha='left', x=-.1, c=c_title)
+
+	legend1 = plt.legend([handles[0],handles[1]], [labels[0],labels[1]], loc='upper center', bbox_to_anchor=(0.4, 1.08), frameon=False, ncol=2, fontsize=23)
+	plt.legend([handles[2]], [labels[2]], loc='upper center', bbox_to_anchor=(0.84, 1.08), frameon=False, ncol=1, fontsize=23)
+	plt.gca().add_artist(legend1)
+	plt.tight_layout()
+	plt.grid(axis='y')
+    
+	ax1.set_xlim([-0.07, 1.1])
+    
+	plt.show()
+
+	return threshold, area_inters_x
+
+
+
+def plot_kde_state(df, weight):
+    
+
+	def _midpoint(p1, p2):
+		return {'x': (p1['x']+p2['x'])/2, 'y': (p1['y']+p2['y'])/2}
+
+	def line_intersection(in_state, out_state, intersect_points):
+		index_in = np.argmax(in_state[1])
+		index_out = np.argmax(out_state[1])
+
+        # points of the mean of the distributions 
+		point_in={'x': in_state[0][index_in], 'y': in_state[1][index_in]}
+		point_out={'x': out_state[0][index_out], 'y': out_state[1][index_out]}
+
+        # medianpoint (mean of the means) of the two distributions
+		midpoint = _midpoint(point_in, point_out)
+        
+        #find index of intersection closer to midpoint
+		index_closer = np.argmin([np.sqrt( (p[0] - midpoint['x'])**2 + (p[1] - midpoint['y'])**2 ) for p in intersect_points])
+
+        # return x value of closer intersection
+		return intersect_points[index_closer][0]
+    
+
+	#label = "agree" if weight == 1 else "disagree"
+	x0 = df.loc[(df['state']=='in')&(df['weight'] == weight)]['perc']
+	x1 = df.loc[(df['state']=='out')&(df['weight'] == weight)]['perc']
+
+	bw = len(x0)**(-1./(2+4))
+	kde0 = gaussian_kde(x0, bw_method=bw)
+	bw = len(x1)**(-1./(2+4))
+	kde1 = gaussian_kde(x1, bw_method=bw)
+
+	xmin = min(x0.min(), x1.min())
+	xmax = max(x0.max(), x1.max())
+	dx = 0.2 * (xmax - xmin) # add a 20% margin, as the kde is wider than the data
+	xmin -= dx
+	xmax += dx
+
+	x = np.linspace(xmin, xmax, 500)
+	kde0_x = kde0(x)
+	kde1_x = kde1(x)
+	inters_x = np.minimum(kde0_x, kde1_x)
+
+	idx = np.argwhere(np.diff(np.sign(kde0_x - kde1_x))).flatten()
+
+	threshold = line_intersection([x, kde0_x], [x, kde0_x], [[x,y] for x,y in zip (x[idx], kde1_x[idx])])
+
+	fig1, ax1 = plt.subplots(1, 1, figsize=(15, 10))
+	fig1.set_size_inches(14, 10)
+
+	ax1.plot(x, kde0_x, color='b', label='intra-state')
+	ax1.fill_between(x, kde0_x, 0, color='b', alpha=0.2)
+
+	ax1.plot(x, kde1_x, color='orange', label='inter-state')
 	ax1.fill_between(x, kde1_x, 0, color='orange', alpha=0.2)
 
 	ax1.plot(x, inters_x, color='tomato')
