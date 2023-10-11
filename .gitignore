@@ -1,3 +1,18 @@
 dataset/download_votes_merged/*.csv
 dataset/download_votes_merged_senate/*csv
 
+dataset/download_votes_merged_cat/Social_Welfare/*.csv
+dataset/download_votes_merged_cat/Miscellaneous_Policy/*.csv
+dataset/download_votes_merged_cat/Government_Management/*.csv
+dataset/download_votes_merged_cat/Foreign_and_Defense_Policy/*.csv
+dataset/download_votes_merged_cat/Civil_Liberties/*.csv
+dataset/download_votes_merged_cat/Agriculture/*.csv
+
+dataset/download_votes_merged_senate_cat/Social_Welfare/*.csv
+dataset/download_votes_merged_senate_cat/Miscellaneous_Policy/*.csv
+dataset/download_votes_merged_senate_cat/Government_Management/*.csv
+dataset/download_votes_merged_senate_cat/Foreign_and_Defense_Policy/*.csv
+dataset/download_votes_merged_senate_cat/Civil_Liberties/*.csv
+dataset/download_votes_merged_senate_cat/Agriculture/*.csv
+
+
