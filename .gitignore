@@ -5,5 +5,7 @@ dataset/*/*/*.csv
 dataset/*.csv
 dataset/*/*/*.csv
 
+dataset/edgelists/*/*/*.csv
+
 
 
