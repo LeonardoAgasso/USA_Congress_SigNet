@@ -3,7 +3,13 @@ dataset/download_votes_merged_senate/*csv
 
 dataset/*/*/*.csv
 dataset/*.csv
-dataset/*/*/*.csv
+dataset/*/*.csv
+dataset/*/*/*/*.csv
+
+dataset/*/*/*.png
+dataset/*.png
+dataset/*/*.png
+dataset/*/*/*/*.png
 
 dataset/edgelists/*/*/*.csv
 
