@@ -14,7 +14,7 @@ CVDIR := ./congressional_votes/
 
 
 clean:
-	rm -f *.csv
+	rm -f *.csv 
 
 
 HSall_members.csv:
