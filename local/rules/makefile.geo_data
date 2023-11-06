@@ -1,7 +1,9 @@
 .DELETE_ON_ERROR:
 .DEFAULT_GOAL := download_votes 
 
-N_CONGRESSES := $(shell seq -f "%03g" 77 117)
+FIRST_CONGRESS := 77
+LAST_CONGRESS := 117
+N_CONGRESSES := $(shell seq -f "%03g" $(FIRST_CONGRESS) $(LAST_CONGRESS))
 
 BASE_URL_VOTES := https://voteview.com/static/data/out/votes/HS
 BASE_URL_ROLLCALLS := https://voteview.com/static/data/out/rollcalls/HS
