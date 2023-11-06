@@ -1,13 +1,13 @@
 .DELETE_ON_ERROR:
-.DEFAULT_GOAL := download_votes
+.DEFAULT_GOAL := download_votes 
 
 N_CONGRESSES := $(shell seq -f "%03g" 77 117)
 
 BASE_URL_VOTES := https://voteview.com/static/data/out/votes/HS
 BASE_URL_ROLLCALLS := https://voteview.com/static/data/out/rollcalls/HS
 
-MEMBERS_VOTES_FILES := $(addprefix HS, $(addsuffix _votes.tsv, $(N_CONGRESSES)))
-CONGRESSIONAL_VOTES_FILES :=  $(addprefix HS, $(addsuffix _rollcalls.tsv, $(N_CONGRESSES)))
+MEMBERS_VOTES_FILES := $(addprefix HS, $(addsuffix _votes.csv, $(N_CONGRESSES)))
+CONGRESSIONAL_VOTES_FILES :=  $(addprefix HS, $(addsuffix _rollcalls.csv, $(N_CONGRESSES)))
 
 MVDIR := ./members_votes/
 CVDIR := ./congressional_votes/
@@ -35,12 +35,4 @@ HS%_votes.csv:
 
 HS%_rollcalls.csv:
 	wget -O $(CVDIR)$@ "$(BASE_URL_ROLLCALLS)$(patsubst HS%,%,$@)"
-
-HS%_votes.tsv: HS%_votes.csv
-	csv2tsv < $(MVDIR)$< > $(MVDIR)$@;
-	rm $(MVDIR)$<
-
-HS%_rollcalls.tsv: HS%_rollcalls.csv
-	csv2tsv < $(CVDIR)$< > $(MVDIR)$@
-	rm $(CVDIR)$<
 
