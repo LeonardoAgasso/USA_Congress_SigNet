@@ -41,3 +41,12 @@ HS%_votes.csv:
 HS%_rollcalls.csv:
 	wget -O $(CVDIR)$@ "$(BASE_URL_ROLLCALLS)$(patsubst HS%,%,$@)"
 
+
+# Produce the congress files adding info about the party and the members
+### THIS IS PRELIMINARLY DONE IN A NOTEBOOK TO TEST THE FUNCTIONS ###
+
+
+
+# Make the members.csv file useful for the notebook
+members.csv: HSall_members.csv HSall_parties.csv
+	makeMembers $^ > $@

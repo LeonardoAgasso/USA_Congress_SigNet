@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+
+import sys
+import pandas as pd
+
+members = pd.read_csv(sys.argv[1])
+parties = pd.read_csv(sys.argv[2])
+
+def create_members_df():
+    temp_congress = members.groupby('icpsr', as_index=False)[['congress']].agg(lambda x: list(x))
+    temp_party = members.groupby('icpsr', as_index=False)[['party_code']].agg(lambda x: list(set(x)))
+    temp_congress = temp_congress.merge(temp_party)
+    temp_congress['bioname'] = temp_congress['icpsr'].map(members[['icpsr', 'bioname']].set_index('icpsr').to_dict()['bioname'])
+    temp_congress['state_abbrev'] = temp_congress['icpsr'].map(members[['icpsr', 'state_abbrev']].set_index('icpsr').to_dict()['state_abbrev'])
+    #temp_congress['district_code'] = temp_congress['icpsr'].map(members[['icpsr', 'district_code']].set_index('icpsr').to_dict()[str('district_code')])
+    party_codes_dic = parties[['party_name', 'party_code']].set_index('party_code').to_dict()['party_name']
+    temp_congress['party_name'] = temp_congress['party_code'].apply(lambda x: [party_codes_dic[y] for y in x])    
+    return temp_congress
+
+new_members = create_members_df()
+new_members.to_csv('members.csv', index=False)
