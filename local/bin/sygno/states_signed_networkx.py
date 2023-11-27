@@ -51,8 +51,8 @@ def _draw_signed_networkx_edges(G,
                                 pos, 
                                 limits, 
                                 edge_alpha = 1, 
-                                linewidth = .6, 
-                                edges_linestyle = '-',
+                                linewidth = .7, 
+                                edges_linestyle = '.',
                                 edges_color = None,
                                 show_edges = None,
                                 highlight_edges = None,
@@ -229,33 +229,56 @@ def _draw_signed_networkx_nodes(G, ax, pos,
     
     nodes = nodes.loc[~nodes['node'].isin(outliers),]
     
-    for mark in set(nodes['marker']):
-        tmp = nodes.loc[nodes['marker'] == mark,]
-        
-        ax.scatter(tmp['posx'], tmp['posy'], facecolor = tmp['color'], edgecolor = tmp['border_color'], alpha = node_alpha,
-               s = tmp['size'], linewidth = tmp['border_width'], marker = mark, zorder = 5)
-    
     occupied_positions = set()
 
-    for _, row in tmp.iterrows():
-        label_x_starting_offset = 0.1
-        label_y_starting_offset = 0.1
-        x_avoid_offset = 0.01
-        y_avoid_offset = 0.01
-        label_radius = 0.2
-        label_x = row['posx'] + label_x_starting_offset
-        label_y = row['posy']
+    for mark in set(nodes['marker']):
+        tmp = nodes.loc[nodes['marker'] == mark,]
 
-        # Check if the label position is already occupied
-        while any(np.linalg.norm((label_x - x, label_y - y)) < label_radius for x, y in occupied_positions):
-            if label_y >= 0:
-                label_x += x_avoid_offset  
-            if label_y == 0:
-                label_y -= y_avoid_offset
+        ax.scatter(tmp['posx'], tmp['posy'], facecolor=tmp['color'], edgecolor=tmp['border_color'], alpha=node_alpha,
+               s=tmp['size'], linewidth=tmp['border_width'], marker=mark, zorder=5)
 
-        occupied_positions.add((label_x, label_y))
+        for _, row in tmp.iterrows():
+            label_x_starting_offset = 0.15
+            label_y_starting_offset = 0.2
+            x_avoid_offset = 0.05
+            y_avoid_offset = 0.07       
+            label_radius = 0.1
+
+            if row['posy'] > 0:
+                label_y = row['posy']
+                if row['posx'] > 0:
+                    label_x = row['posx'] + label_x_starting_offset
+                else:
+                    label_x = row['posx'] - label_x_starting_offset
             
-        ax.text(label_x, label_y, str(row['node']), fontsize=label_fontsize, ha='left', va='center', color = row['color'], zorder = 6)
+            else:
+                label_y = row['posy'] - label_y_starting_offset
+                if row['posx'] > 0:
+                    label_x = row['posx'] 
+                else:
+                    label_x = row['posx'] 
+
+            # Check if the label position is already occupied
+            while any(np.linalg.norm((label_x - x, label_y - y)) < label_radius for x, y in occupied_positions):
+                if row['posy'] > 0:
+                    # Check if the node is on the right side of the x-axis
+                    if label_x > 0:
+                        label_x = label_x + x_avoid_offset
+                    # Check if the node is on the left side of the x-axis
+                    elif label_x < 0:
+                        label_x = label_x - x_avoid_offset
+                else:
+                    # Check if the node is on the right side of the x-axis
+                    if label_x > 0:
+                        label_y -= y_avoid_offset
+                    # Check if the node is on the left side of the x-axis
+                    elif label_x < 0:
+                        label_y -= y_avoid_offset
+
+
+            occupied_positions.add((label_x, label_y))
+
+            ax.text(label_x, label_y, str(row['node']), fontsize=label_fontsize, ha='left', va='center', color=row['color'], zorder=6)
     
 
  
@@ -381,7 +404,7 @@ def draw_signed_networkx(G,
                          fig = None,
                          node_size = 40,
                          node_alpha = .6,
-                         edge_alpha = .6,
+                         edge_alpha = .2,
                          node_color='black', 
                          node_shape='o',
                          border_color = 'white', 
