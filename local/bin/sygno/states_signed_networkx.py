@@ -239,10 +239,10 @@ def _draw_signed_networkx_nodes(G, ax, pos,
         
         for _, row in tmp.iterrows():
             label_x_starting_offset = 0.15
-            label_y_starting_offset = 0.6
+            label_y_starting_offset = 0.8
             x_avoid_offset = 0.1
             y_avoid_offset = 0.5       
-            label_radius = 0.1
+            label_radius = 0.2
 
             if row['posy'] == 0:
                 test_label_x = row['posx']
