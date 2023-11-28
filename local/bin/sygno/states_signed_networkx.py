@@ -359,7 +359,7 @@ def _draw_ax(fig, ax, limits, angle, show_rotation, rect, theme, least_eigenvalu
     
     # Get rotated plot
     if not fig:
-        fig = plt.figure(figsize = (10, 8))
+        fig = plt.figure(figsize = (20, 15))
     ax, ax1 = _setup_axes1(fig, angle, left, right, up, bottom, ax = ax, rect = rect)
     
     for figax in fig.axes:
@@ -390,7 +390,7 @@ def draw_signed_networkx(G,
                          ax = None,
                          rect = None,
                          fig = None,
-                         node_size = 30,
+                         node_size = 140,
                          node_alpha = .6,
                          edge_alpha = .2,
                          node_color='black', 
